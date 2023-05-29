@@ -54,6 +54,45 @@ from random import randint
 # def decode_code_word(code_word):
 #     print(123)
 
+def make_vector_need_len(vector, vector_length):
+    vector_copy = deepcopy(vector)
+    while len(vector_copy) < vector_length:
+        vector_copy.append(0)
+    return vector_copy
+
+# делаем вектор биноминальным (состоящим только из 0 и 1)
+def get_binom_vector(vector):
+    vector_copy = deepcopy(vector)
+    for i in range(len(vector_copy)):
+        if vector_copy[i] % 2 == 0:
+            vector_copy[i] = 0
+        else:
+            vector_copy[i] = 1
+    return vector_copy
+
+# получаем вектор с элементом заданной степени
+def get_vector_from_power(power):
+    vector = [0]*(power+1)
+    vector[power] = 1
+    return vector
+
+# получаем кол-во ненулевых элементов в векторе
+def get_wt(vector):
+    return sum(vector)
+
+# получаем синдром из вектора (кодового слова)
+def get_syndrome_from_vector(code_word, gen_polynom, n):
+    syndrome = list(Polynomial(code_word) % Polynomial(gen_polynom))
+    for i in range(len(syndrome)):
+        if syndrome[i] % 2 == 0:
+            syndrome[i] = 0
+        else:
+            syndrome[i] = 1
+    while len(syndrome) < n:
+        syndrome.append(0)
+    return syndrome
+
+# получаем длину кодовых слов (m + k - сумма макс степени порожд полинома и длины инф слов)
 def get_n(g, len_of_inf_word):
     gen_polynom = deepcopy(list(g))
     m = 0
@@ -63,6 +102,7 @@ def get_n(g, len_of_inf_word):
             break
     return m + len_of_inf_word
 
+# получаем информационные слова заданной длины из переданного текста
 def get_inf_words(text, len_of_inf_word):
     inf_words = [bin(ord(char))[2:] for char in list(text)]
     for i in range(len(inf_words)):
@@ -75,6 +115,7 @@ def get_inf_words(text, len_of_inf_word):
     # print(inf_words)
     return inf_words
 
+# получаем кодовое слово из информационного слова
 def get_code_words(inf_words, gen_polynom, n):
     code_words = []
     for inf_word in inf_words:
@@ -91,63 +132,7 @@ def get_code_words(inf_words, gen_polynom, n):
         code_words.append(code_word)
     return code_words
 
-def get_error_vectors(n):
-    error_vectors = []
-    # количество вектор ошибок равно количеству строк транспонированной проверочной матрицы
-    for i in range(n):
-        error_vector = []
-        for j in range(n):
-            error_vector.append(0)
-        error_vector[i] = 1
-        # т.к. единицы идут справа-налево по диагонали
-        # error_vector.reverse()
-        error_vectors.append(error_vector)
-    # вектора для декодирования двух ошибок, например:
-    # 110000
-    # 101000
-    # 100100
-    # ...
-    error_vectors2 = []
-
-    for i in range(len(error_vectors)):
-        for j in range(i+1, len(error_vectors)):
-            error_vector = deepcopy(error_vectors[i])
-            error_vector[j] = 1
-            error_vectors2.append(error_vector)
-    
-    for el in error_vectors2:
-        error_vectors.append(el)
-    
-    return(error_vectors)
-
-def get_syndrome_from_vector(code_word, gen_polynom, n):
-    syndrome = list(Polynomial(code_word) % Polynomial(gen_polynom))
-    for i in range(len(syndrome)):
-        if syndrome[i] % 2 == 0:
-            syndrome[i] = 0
-        else:
-            syndrome[i] = 1
-    while len(syndrome) < n:
-        syndrome.append(0)
-    return syndrome
-
-def get_syndromes_from_vectors(vectors, gen_polynom, n):
-    syndromes = []
-    for i in range(len(vectors)):
-        syndromes.append(get_syndrome_from_vector(vectors[i], gen_polynom, n))
-    return syndromes
-
-def get_code_word_without_mistake(code_word_with_mistake, error_vector, n):
-    code_word_without_mistake = list(Polynomial(code_word_with_mistake) - Polynomial(error_vector))
-    for i in range(len(code_word_without_mistake)):
-        if code_word_without_mistake[i] % 2 == 0:
-            code_word_without_mistake[i] = 0
-        else:
-            code_word_without_mistake[i] = 1
-    while len(code_word_without_mistake) < n:
-        code_word_without_mistake.append(0)
-    return code_word_without_mistake
-
+# получаем информационное слово из кодового 
 def get_inf_word_from_code_word(code_word, gen_polynom):
     inf_word = list(Polynomial(code_word) // Polynomial(gen_polynom))
     for i in range(len(inf_word)):
@@ -157,6 +142,7 @@ def get_inf_word_from_code_word(code_word, gen_polynom):
             inf_word[i] = 1
     return inf_word
 
+# делаем произвольное число ошибок (от 0 до num_of_errors) ошибок в векторе
 def make_mistake_in_vector(vector, num_of_errors):
     vector_copy = deepcopy(vector)
     # # Если хотим чтобы ошибки не накладывались друг на друга - раскоментировать нижнее
@@ -178,6 +164,7 @@ def make_mistake_in_vector(vector, num_of_errors):
     # print('#####################')
     return vector_copy
 
+# делаем произвольное число ошибок (от 0 до num_of_errors) ошибок во всех векторах
 def make_mistake_in_vectors(vectors, num_of_errors):
     vectors_copy = deepcopy(vectors)
     for i in range(len(vectors)):
@@ -186,14 +173,91 @@ def make_mistake_in_vectors(vectors, num_of_errors):
 
 def get_solution():
     g = [1, 0, 0, 0, 1, 0, 1, 1, 1]
-    len_of_inf_word = 15
+    len_of_inf_word = 7
+    t = 2
     n = get_n(g, len_of_inf_word)
     print('n: ', n)
-    inf_words = get_inf_words("9", len_of_inf_word)
+
+    inf_words = get_inf_words(chr(int('0b1101', 2)), len_of_inf_word)
     print('inf_words: ', inf_words)
+
     code_words = get_code_words(inf_words, g, n)
     print('code_words', code_words)
-    
+
+
+
+    #####################
+    code_word = [1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+    code_word_with_one_mistake = make_mistake_in_vector(code_word, 2) # code_word_with_one_mistake
+    # code_word_with_one_mistake = [1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0] # code_word_with_one_mistake
+    # code_word_with_two_mistake = [1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0] # code_word_with_two_mistake
+    # code_word_with_two_mistake = [1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0] # code_word_with_two_mistake
+
+    initial_syndrome = get_syndrome_from_vector(code_word_with_one_mistake, g, n)
+    print('initial_syndrome: ', initial_syndrome)
+
+    initial_code_word = []
+    error_vector = []
+    if (sum(initial_syndrome) == 0):
+        initial_code_word = code_word_with_one_mistake
+        print('1) initial_code_word: ', initial_code_word)
+ 
+    elif (get_wt(initial_syndrome) <= t):
+        error_vector = initial_syndrome
+        initial_code_word = get_binom_vector([int(num) for num in list(Polynomial(code_word_with_one_mistake) - Polynomial(error_vector))])
+        initial_code_word = make_vector_need_len(initial_code_word, n)
+        print('2) initial_code_word: ', initial_code_word)
+        print('equal: ', initial_code_word == code_word)
+
+    else:
+        for i in range(1,n):
+            current_syndrome = get_binom_vector(list((Polynomial([0, 1]) * Polynomial(initial_syndrome)) % Polynomial(g)))
+            print('initial_syndrome: ', initial_syndrome)
+            print('current_syndrome: ', current_syndrome)
+            initial_syndrome = current_syndrome
+            # while len(current_syndrome) < n:
+            #     current_syndrome.append(0)
+            if (get_wt(current_syndrome) <= t):
+                print(n)
+                print(list(Polynomial(get_vector_from_power(n)) + 1))
+                print(list((Polynomial(get_vector_from_power(n-i)) * Polynomial(current_syndrome))))
+                error_vector1 = list((Polynomial(get_vector_from_power(n-i)) * Polynomial(current_syndrome)) % (Polynomial(get_vector_from_power(n)) + 1))
+                error_vector1 = get_binom_vector(error_vector1)
+                print('error_vector1: ', error_vector1)
+                # while len(error_vector) < n:
+                #     error_vector.append(0)
+                cd_wd = get_binom_vector(list(Polynomial(code_word_with_one_mistake) - Polynomial(error_vector1)))
+                cd_wd = make_vector_need_len(cd_wd, n)
+                print('cd_wd: ', cd_wd)
+                initial_syndrome = current_syndrome
+                if (cd_wd == code_word):
+                    print(cd_wd)
+                    print('equal: ', cd_wd == code_word)
+                break
+                # break
+            else:
+                initial_syndrome = current_syndrome
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # all_possible_syndromes = get_syndromes_from_vectors(all_error_vectors, g, n)
     # # for el in all_possible_syndromes:
     # #     print(el)
