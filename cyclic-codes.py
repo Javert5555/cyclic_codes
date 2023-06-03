@@ -185,11 +185,11 @@ def make_mistake_in_vectors(vectors, num_of_errors):
     return vectors_copy
 
 def get_solution():
-    g = [1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1]
+    g = [1, 0, 0, 0, 1, 0, 1, 1, 1]
     # code_word = np.array([0, 1, 0, 0, 0, 0, 1, 0, 1])
     # code_word = np.array([0, 0, 0, 0, 1])
     # v = np.array([1, 0, 1, 1, 0, 0, 1])
-    len_of_inf_word = 12
+    len_of_inf_word = 7
     n = get_n(g, len_of_inf_word)
     inf_words = get_inf_words("9foadsasqnfi", len_of_inf_word)
     print(inf_words)
