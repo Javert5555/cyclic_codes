@@ -4,57 +4,17 @@ from numpy.polynomial import Polynomial
 from random import randint
 from math import ceil
 
+import tkinter as tk
+# from tkinter import ttk
+from tkinter import messagebox
+from tkinter import filedialog as fd
+import tkinter.scrolledtext as scrolledtext
 
-# print(np.polydiv([2,1,1,1], [1,1]))
+# получить последовательность из дважды вложенного массива
+def create_sequence_from_double_nested_array(double_nested_array):
+    return ''.join([''.join([str(char) for char in nested_array]) for nested_array in deepcopy(double_nested_array)])
 
-# def get_code_word(inf_word, gen_polynom):
-#     result = np.polymul(inf_word, gen_polynom)
-#     for i in range(len(result)):
-#         if result[i] % 2 == 0:
-#             result[i] = 0
-#         else:
-#             result[i] = 1
-#     return result
-
-# def get_error_vectors(n):
-#     error_vectors = []
-#     # количество вектор ошибок равно количеству строк транспонированной проверочной матрицы
-#     for i in range(n):
-#         error_vector = []
-#         for j in range(n):
-#             error_vector.append(0)
-#         error_vector[i] = 1
-#         # т.к. единицы идут справа-налево по диагонали
-#         # error_vector.reverse()
-#         error_vectors.append(np.array(error_vector))
-    
-#     # вектора для декодирования двух ошибок, например:
-#     # 110000
-#     # 101000
-#     # 100100
-#     # ...
-#     # error_vectors2 = []
-
-#     # for i in range(len(error_vectors)):
-#     #     for j in range(i+1, len(error_vectors)):
-#     #         error_vector = deepcopy(error_vectors[i])
-#     #         error_vector[j] = 1
-#     #         error_vectors2.append(error_vector)
-    
-#     # for el in error_vectors2:
-#     #     error_vectors.append(el)
-    
-#     return(error_vectors)
-
-# def get_syndromes_vectors(error_vectors, code_word):
-#     syndromes_vectors = []
-#     for i in range(len(error_vectors)):
-#         syndromes_vectors.append(np.polydiv(error_vectors[i], code_word)[1])
-#     return(syndromes_vectors)
-
-# def decode_code_word(code_word):
-#     print(123)
-
+# сделать вектор необходимой длины
 def make_vector_need_len(vector, vector_length):
     vector_copy = deepcopy(vector)
     while len(vector_copy) < vector_length:
@@ -259,7 +219,7 @@ def make_char_from_inf_word(inf_words, need_len_to_make_char_from_inf_word):
         initial_text += chr(int('0b' + ''.join(reversed(list(text[j*need_len_to_make_char_from_inf_word:(j+1)*need_len_to_make_char_from_inf_word]))), 2))
     return initial_text
 
-def get_solution():
+def get_solution(text, num_of_errors):
     # 1 + x + x^2 + x^5 + x^6 + x^9
     g = [1, 0, 0, 0, 1, 0, 1, 1, 1]
     # g = [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1]
@@ -274,7 +234,7 @@ def get_solution():
     n = get_n(g, len_of_inf_word)
     # print('n: ', n)
 
-    text = '1pasdoфывkjsdgfuihduofginфригвынигр ицупвщг  р доыр ваигп'
+    # text = 'й111111111йййййцукенгшщзхъ\фывапролджэячсмитьбю.qwertyuiop[]]]]]\asdfghjkl;zxcvbnm,./|'
 
     inf_words = get_inf_words(text, len_of_inf_word, need_len_to_make_char_from_inf_word)
     # print('inf_words: ', inf_words)
@@ -292,7 +252,7 @@ def get_solution():
     # code_word_with_two_mistake = [1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0] # code_word_with_two_mistake
     # code_word_with_two_mistake = [1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0] # code_word_with_two_mistake
 
-    code_words_with_mistakes = make_mistake_in_vectors(code_words, t)
+    code_words_with_mistakes = make_mistake_in_vectors(code_words, num_of_errors)
     print('code_words_with_mistakes: ', code_words_with_mistakes)
 
     initial_code_words = correct_mistake_in_code_words(code_words_with_mistakes, g, n, t)
@@ -304,94 +264,168 @@ def get_solution():
     print('initial_inf_words:', initial_inf_words)
 
     initial_text = make_char_from_inf_word(initial_inf_words, need_len_to_make_char_from_inf_word)
+    print(text)
+    print(initial_text)
 
     print(initial_text == text)
 
+    return {
+        'text': text,
+        'initial_text': initial_text,
+        'inf_words': create_sequence_from_double_nested_array(inf_words),
+        'code_words': create_sequence_from_double_nested_array(code_words),
+        'code_words_with_mistakes': create_sequence_from_double_nested_array(code_words_with_mistakes)
+    }
+
+class SecondWindow(tk.Toplevel):
+    def __init__(self, master=None, result=None):
+        super().__init__(master)
+        self.title("Second window")
+        self.minsize(600, 500)
+        self.f_top = tk.Frame(self)
+        self.f_top.pack()
+
+        self.label = tk.Label(self.f_top, text='Последовательность кодовых слов:')
+        self.label.pack()
+        self.label.pack(pady=10)
+        # self.label1 = tk.Label(self, text=result['code_words'], wraplength=550, justify="left")
+        # self.label1.pack()
+        # self.label2 = tk.Label(self, text='Последовательность кодовых слов:')
+        # self.label2.pack()
+        # self.label3 = tk.Label(self, text=result['code_words_with_mistakes'], wraplength=550, justify="left")
+        # self.label3.pack()
+        self.text_code_words = scrolledtext.ScrolledText(self.f_top, wrap=tk.WORD, height=12)
+        self.text_code_words.pack()
+        self.text_code_words.insert(tk.END, result['code_words'])
+        
+        self.label1 = tk.Label(self.f_top, text='Последовательность кодовых слов с ошибками:')
+        self.label1.pack()
+        self.label1.pack(pady=10)
+
+        self.text_code_words_with_mistakes = scrolledtext.ScrolledText(self.f_top, wrap=tk.WORD, height=12)
+        self.text_code_words_with_mistakes.pack()
+        self.text_code_words_with_mistakes.insert(tk.END, result['code_words_with_mistakes'])
 
 
 
+class Main(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.geometry('600x500')
+        self.minsize(600, 500)
+        self.title('Циклические коды')
+
+        self.f_top = tk.Frame(self)
+        self.f_top.pack()
+
+        self.f_bottom = tk.Frame(self)
+        self.f_bottom.pack(side='left')
+        self.f_bottom.pack(padx=(20, 0))
+
+        self.f_btn = tk.Frame(self)
+        self.f_btn.pack(side='right')
+
+        self.label_initial_text = tk.Label(self.f_top, text='Введите текст, который надо закодировать: ')
+        self.label_initial_text.pack(side='top')
+        self.label_initial_text.pack(pady=(10, 0))
+
+        self.initial_text = tk.Text(self.f_top, height=20, width=55)
+        self.initial_text.pack(side='top')
+        self.initial_text.pack(pady=(10, 0))
+
+        self.num_of_errors = tk.IntVar()
+
+        self.label_num_of_errors_text = tk.Label(self.f_bottom, text='Укажите максимальное число ошибок в кодовых словах')
+        self.label_num_of_errors_text.pack(side='top')
+        # self.label_num_of_errors_text.pack(pady=(10, 0))
+
+        self.checkbutton1 = tk.Checkbutton(self.f_bottom, text="0 Ошибок", variable=self.num_of_errors, onvalue=0)
+        self.checkbutton1.pack(side='left')
+
+        self.checkbutton2 = tk.Checkbutton(self.f_bottom, text="1 Ошибка", variable=self.num_of_errors, onvalue=1)
+        self.checkbutton2.pack(side='left')
+
+        self.checkbutton3 = tk.Checkbutton(self.f_bottom, text="2 Ошибки", variable=self.num_of_errors, onvalue=2)
+        self.checkbutton3.pack(side='left')
 
 
+        button_1 = tk.Button(self.f_btn, text='Получить результат', font='Times 12', command=self.get_all_inputs_and_get_solution)
+        button_1.pack(side='bottom')
+        button_1.pack(padx=(0, 20))
 
+    def open_window(self, result):
+        self.new_window = SecondWindow(self, result=result)
+    
+    def get_all_inputs_and_get_solution(self):
+        try:
+            self.initial_text_var = self.initial_text.get("1.0","end").strip()
+            if (self.initial_text_var == ''):
+                messagebox.showwarning(title="Предупреждение", message="Введите текст, который надо закодировать")
+                return
+        except:
+            messagebox.showwarning(title="Предупреждение", message="Что-то пошло не так")
+            return
+        # print()
+        # print()
 
+        self.result = get_solution(self.initial_text_var, self.num_of_errors.get())
+        self.open_window(self.result)
 
+    # def get_all_inputs_and_get_solution(self):
+    #     try:
+    #         self.count_of_adders_var = int(self.count_of_adders.get("1.0","end").strip())
+    #         if (self.count_of_adders_var < 2 or self.count_of_adders_var > 5):
+    #             messagebox.showwarning(title="Предупреждение", message="Количество сумматоров должно быть больше 1 и меньше 5")
+    #             return
+    #     except:
+    #         messagebox.showwarning(title="Предупреждение", message="Введите корректные значения количества сумматоров")
+    #         return
+        
+    #     try:
+    #         self.adders_var = [row.split(',') for row in self.adders.get("1.0","end").strip().split('\n')]
+    #         if (self.count_of_adders_var != len(self.adders_var)):
+    #             messagebox.showwarning(title="Предупреждение", message="Неверно указано количество сумматоров")
+    #             return
+    #         for i in range(len(self.adders_var)):
+    #             if (len(self.adders_var[i]) < 2 or len(self.adders_var[i]) > 3):
+    #                 messagebox.showwarning(title="Предупреждение", message="Количество регистров сумматора должно быть равно 2 или 3")
+    #                 return
+    #             for j in range(len(self.adders_var[i])):
+    #                 self.adders_var[i][j] = int(self.adders_var[i][j])
+    #                 if (self.adders_var[i][j] < 1 or self.adders_var[i][j] > 3):
+    #                     messagebox.showwarning(title="Предупреждение", message="Номер регистра не может быть больше 3 или меньше 1")
+    #                     return
+    #     except:
+    #         messagebox.showwarning(title="Предупреждение", message="Введите корректные значения номеров регистров сумматоров")
+    #         return
+        
+    #     try:
+    #         self.num_of_errors_var = int(self.num_of_errors.get("1.0","end").strip())
+    #         if (self.num_of_errors_var < 0 or self.count_of_adders_var > 8):
+    #             messagebox.showwarning(title="Предупреждение", message="Количество ошибок должно быть больше 0 и меньше 9")
+    #             return
+    #     except:
+    #         messagebox.showwarning(title="Предупреждение", message="Указано некорректное число ошибок")
+    #         return
 
+    #     try:
+    #         self.initial_text_var = self.initial_text.get("1.0","end").strip()
+    #         if (self.initial_text_var == ''):
+    #             messagebox.showwarning(title="Предупреждение", message="Введите текст, который надо закодировать")
+    #             return
+    #     except:
+    #         messagebox.showwarning(title="Предупреждение", message="Что-то пошло не так")
+    #         return
+        
+    #     result = get_solution({
+    #         'count_of_adders': self.count_of_adders_var,
+    #         'adders': self.adders_var,
+    #         'num_of_errors': self.num_of_errors_var,
+    #         'initial_text': self.initial_text_var
+    #     })
+    #     messagebox.showwarning(title="Закодированная последовательность", message=result['code_words'])
+    #     messagebox.showwarning(title="Исходная последовательность", message=result['initial_text'])
 
-
-
-
-
-
-
-
-
-
-
-
-
-    # all_possible_syndromes = get_syndromes_from_vectors(all_error_vectors, g, n)
-    # # for el in all_possible_syndromes:
-    # #     print(el)
-
-    # code_words_with_mistakes = make_mistake_in_vectors(code_words, 2)
-
-    # all_syndromes = get_syndromes_from_vectors(code_words_with_mistakes, g, n)
-    # # print('syndr ', all_syndromes)
-
-    # # initial_letters = []
-    # # for i in range(len(all_syndromes)):
-    # #     if (sum(all_syndromes[i]) == 0):
-    # #         initial_letter = deepcopy(inf_words[i])
-    # #         initial_letter.reverse()
-    # #         initial_letter = chr(int('0b' + ''.join([str(num) for num in initial_letter]), 2))
-    # #         initial_letters.append(initial_letter)
-    # #         print(initial_letter)
-    # #     elif (all_syndromes[i] in all_possible_syndromes):
-    # #         # print('n', n)
-    # #         e = all_syndromes[i]
-    # #         syndrome = all_syndromes[i]
-    # #         for j in range(1, n):
-    # #             # print(j)
-    # #             left_part = list(Polynomial([0, 1]) * Polynomial(syndrome))
-    # #             syndrome =  get_syndrome_from_code_word_vector(left_part, g, n)
-    # #             # print(syndrome)
-    # #             if (sum(syndrome) <= 2):
-    # #                 e = Polynomial([0, 1]) ** 2
-    # #                 # print('e', e)
-    # # code_word = [1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0]
-    # code_word = [0,1,1,1,0,1,1,0,0,1,0,1]
-    # e = get_syndrome_from_code_word_vector(code_word, g, n)
-    # syndrome = get_syndrome_from_code_word_vector(code_word, g, n)
-    # for j in range(1, n):
-    #     # print(j)
-    #     left_part = list(Polynomial([0, 1]) * Polynomial(syndrome))
-    #     syndrome =  get_syndrome_from_code_word_vector(left_part, g, n)
-    #     print(syndrome)
-    #     if (sum(syndrome) <= 2):
-    #         e = Polynomial([0, 1]) ** (n-j) % Polynomial([1,0,0,0,0,0])
-    #         print(n)
-
-    # print(initial_letters)
-
-get_solution()
-
-# print(list(get_code_word(i,g)))
-# print(error_vectors[0] == Polynomial([1,0,0,0,0,0,0]))
-
-
-
-
-# i = np.array([1, 1, 0, 1])
-
-# # Define the second polynomial as a NumPy array
-# g = np.array([1, 1, 0, 1])
-
-# v = np.array([1, 0, 1, 1, 0, 0, 1])
-# error_vectors = get_error_vectors(7)
-
-# print(get_syndromes_vectors(error_vectors, g))
-# print(get_syndromes_vectors(error_vectors, g))
-
-# print(get_code_word(deepcopy(i), deepcopy(g)))
-# print(get_error_vectors(7))
-
+if __name__ == "__main__":
+    main = Main()
+    main.mainloop()
