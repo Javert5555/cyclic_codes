@@ -181,10 +181,10 @@ def correct_mistake_in_code_word(code_word_with_mistakes, gen_polynom, n, t):
     return initial_code_word
 
 def correct_mistake_in_code_words(code_words_with_mistakes, gen_polynom, n, t):
-    initial_code_words = []
+    correct_code_words = []
     for code_word_with_mistake in code_words_with_mistakes:
-        initial_code_words.append(correct_mistake_in_code_word(code_word_with_mistake, gen_polynom, n, t))
-    return initial_code_words
+        correct_code_words.append(correct_mistake_in_code_word(code_word_with_mistake, gen_polynom, n, t))
+    return correct_code_words
 
 
 # получаем информационное слово из кодового 
@@ -200,24 +200,24 @@ def get_inf_word_from_code_word(code_word, gen_polynom, len_of_inf_word):
 
 # получаем информационные слова из кодовых слов
 def get_inf_words_from_code_words(code_words, gen_polynom, len_of_inf_word):
-    initial_inf_words = []
+    decode_inf_words = []
     for code_word in code_words:
-        initial_inf_words.append(get_inf_word_from_code_word(code_word, gen_polynom, len_of_inf_word))
-    return initial_inf_words
+        decode_inf_words.append(get_inf_word_from_code_word(code_word, gen_polynom, len_of_inf_word))
+    return decode_inf_words
 
 # получить букву из информационного слова
 def make_char_from_inf_word(inf_word):
     return chr(int('0b' + ''.join([str(num) for num in reversed(deepcopy(inf_word))]), 2))
 
 def make_char_from_inf_word(inf_words, need_len_to_make_char_from_inf_word):
-    initial_text = ''
+    decode_text = ''
     text = deepcopy(inf_words)
     for i in range(len(text)):
         text[i] = ''.join([str(char) for char in text[i]])
     text = ''.join(text)
     for j in range(len(text)//need_len_to_make_char_from_inf_word):
-        initial_text += chr(int('0b' + ''.join(reversed(list(text[j*need_len_to_make_char_from_inf_word:(j+1)*need_len_to_make_char_from_inf_word]))), 2))
-    return initial_text
+        decode_text += chr(int('0b' + ''.join(reversed(list(text[j*need_len_to_make_char_from_inf_word:(j+1)*need_len_to_make_char_from_inf_word]))), 2))
+    return decode_text
 
 def get_solution(text, num_of_errors):
     # 1 + x + x^2 + x^5 + x^6 + x^9
@@ -255,56 +255,99 @@ def get_solution(text, num_of_errors):
     code_words_with_mistakes = make_mistake_in_vectors(code_words, num_of_errors)
     print('code_words_with_mistakes: ', code_words_with_mistakes)
 
-    initial_code_words = correct_mistake_in_code_words(code_words_with_mistakes, g, n, t)
+    correct_code_words = correct_mistake_in_code_words(code_words_with_mistakes, g, n, t)
 
-    initial_inf_words = get_inf_words_from_code_words(initial_code_words, g, len_of_inf_word)
+    decode_inf_words = get_inf_words_from_code_words(correct_code_words, g, len_of_inf_word)
     print('code_words:', code_words)
-    print('initial_code_words:', initial_code_words)
+    print('correct_code_words:', correct_code_words)
     print('inf_words:', inf_words)
-    print('initial_inf_words:', initial_inf_words)
+    print('decode_inf_words:', decode_inf_words)
 
-    initial_text = make_char_from_inf_word(initial_inf_words, need_len_to_make_char_from_inf_word)
+    decode_text = make_char_from_inf_word(decode_inf_words, need_len_to_make_char_from_inf_word)
     print(text)
-    print(initial_text)
+    print(decode_text)
 
-    print(initial_text == text)
+    print(decode_text == text)
 
     return {
-        'text': text,
-        'initial_text': initial_text,
+        'initial_text': text,
+        'decode_text': decode_text,
         'inf_words': create_sequence_from_double_nested_array(inf_words),
+        'decode_inf_words': create_sequence_from_double_nested_array(decode_inf_words),
         'code_words': create_sequence_from_double_nested_array(code_words),
-        'code_words_with_mistakes': create_sequence_from_double_nested_array(code_words_with_mistakes)
+        'code_words_with_mistakes': create_sequence_from_double_nested_array(code_words_with_mistakes),
+        'correct_code_words': create_sequence_from_double_nested_array(correct_code_words)
     }
 
 class SecondWindow(tk.Toplevel):
     def __init__(self, master=None, result=None):
         super().__init__(master)
         self.title("Second window")
-        self.minsize(600, 500)
-        self.f_top = tk.Frame(self)
-        self.f_top.pack()
+        self.minsize(1320, 660)
 
-        self.label = tk.Label(self.f_top, text='Последовательность кодовых слов:')
-        self.label.pack()
-        self.label.pack(pady=10)
-        # self.label1 = tk.Label(self, text=result['code_words'], wraplength=550, justify="left")
-        # self.label1.pack()
-        # self.label2 = tk.Label(self, text='Последовательность кодовых слов:')
-        # self.label2.pack()
-        # self.label3 = tk.Label(self, text=result['code_words_with_mistakes'], wraplength=550, justify="left")
-        # self.label3.pack()
-        self.text_code_words = scrolledtext.ScrolledText(self.f_top, wrap=tk.WORD, height=12)
-        self.text_code_words.pack()
-        self.text_code_words.insert(tk.END, result['code_words'])
-        
-        self.label1 = tk.Label(self.f_top, text='Последовательность кодовых слов с ошибками:')
-        self.label1.pack()
+        self.f_left = tk.Frame(self)
+        self.f_left.pack(side='left')
+        self.f_left.pack(padx=(10, 10))
+
+        self.f_right = tk.Frame(self)
+        self.f_right.pack(side='left')
+        self.f_right.pack(padx=(10, 10))
+
+        self.label1 = tk.Label(self.f_left, text=result['title1'])
+        self.label1.pack(side='top')
         self.label1.pack(pady=10)
 
-        self.text_code_words_with_mistakes = scrolledtext.ScrolledText(self.f_top, wrap=tk.WORD, height=12)
-        self.text_code_words_with_mistakes.pack()
+        self.text_code_words = scrolledtext.ScrolledText(self.f_left, wrap=tk.WORD, height=10)
+        self.text_code_words.pack(side='top')
+        self.text_code_words.insert(tk.END, result['code_words'])
+        
+        self.label2 = tk.Label(self.f_left, text=result['title2'])
+        self.label2.pack(side='top')
+        self.label2.pack(pady=10)
+
+        self.text_code_words_with_mistakes = scrolledtext.ScrolledText(self.f_left, wrap=tk.WORD, height=10)
+        self.text_code_words_with_mistakes.pack(side='top')
         self.text_code_words_with_mistakes.insert(tk.END, result['code_words_with_mistakes'])
+        
+        self.label3 = tk.Label(self.f_left, text=result['title3'])
+        self.label3.pack(side='top')
+        self.label3.pack(pady=10)
+
+        self.text_correct_code_words = scrolledtext.ScrolledText(self.f_left, wrap=tk.WORD, height=10)
+        self.text_correct_code_words.pack(side='top')
+        self.text_correct_code_words.insert(tk.END, result['correct_code_words'])
+        
+        self.label4 = tk.Label(self.f_right, text=result['title4'])
+        self.label4.pack(side='top')
+        self.label4.pack(pady=10)
+
+        self.text_inf_words = scrolledtext.ScrolledText(self.f_right, wrap=tk.WORD, height=7)
+        self.text_inf_words.pack(side='top')
+        self.text_inf_words.insert(tk.END, result['inf_words'])
+        
+        self.label5 = tk.Label(self.f_right, text=result['title5'])
+        self.label5.pack(side='top')
+        self.label5.pack(pady=10)
+
+        self.text_decode_inf_words = scrolledtext.ScrolledText(self.f_right, wrap=tk.WORD, height=7)
+        self.text_decode_inf_words.pack(side='top')
+        self.text_decode_inf_words.insert(tk.END, result['decode_inf_words'])
+        
+        self.label6 = tk.Label(self.f_right, text=result['title6'])
+        self.label6.pack(side='top')
+        self.label6.pack(pady=10)
+
+        self.initial_text = scrolledtext.ScrolledText(self.f_right, wrap=tk.WORD, height=7)
+        self.initial_text.pack(side='top')
+        self.initial_text.insert(tk.END, result['initial_text'])
+        
+        self.label7 = tk.Label(self.f_right, text=result['title7'])
+        self.label7.pack(side='top')
+        self.label7.pack(pady=10)
+
+        self.decode_text = scrolledtext.ScrolledText(self.f_right, wrap=tk.WORD, height=7)
+        self.decode_text.pack(side='top')
+        self.decode_text.insert(tk.END, result['decode_text'])
 
 
 
@@ -369,7 +412,29 @@ class Main(tk.Tk):
         # print()
 
         self.result = get_solution(self.initial_text_var, self.num_of_errors.get())
-        self.open_window(self.result)
+
+        self.open_window({
+            'title1': 'Последовательность кодовых слов:',
+            'code_words': self.result['code_words'],
+            'title2': 'Последовательность кодовых слов с ошибками:',
+            'code_words_with_mistakes': self.result['code_words_with_mistakes'],
+            'title3': 'Последовательность кодовых слов с исправленными ошибками:',
+            'correct_code_words': self.result['correct_code_words'],
+            'title4': 'Последовательность информационных слов:',
+            'inf_words': self.result['inf_words'],
+            'title5': 'Последовательность информационных слов после декодирования:',
+            'decode_inf_words': self.result['decode_inf_words'],
+            'title6': 'Начальный текст:',
+            'initial_text': self.result['initial_text'],
+            'title7': 'Текст после кодирования/декодирования:',
+            'decode_text': self.result['decode_text'],
+        })
+        # self.open_window({
+        #     'input_title': 'Последовательность информационных слов до декодирования:',
+        #     'input_text': self.result['inf_words'],
+        #     'output_title': 'Последовательность информационных слов после декодирования:',
+        #     'output_text': self.result['code_words_with_mistakes']
+        # })
 
     # def get_all_inputs_and_get_solution(self):
     #     try:
