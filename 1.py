@@ -253,21 +253,21 @@ def get_solution(text, num_of_errors):
     # code_word_with_two_mistake = [1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0] # code_word_with_two_mistake
 
     code_words_with_mistakes = make_mistake_in_vectors(code_words, num_of_errors)
-    print('code_words_with_mistakes: ', code_words_with_mistakes)
+    # print('code_words_with_mistakes: ', code_words_with_mistakes)
 
     correct_code_words = correct_mistake_in_code_words(code_words_with_mistakes, g, n, t)
 
     decode_inf_words = get_inf_words_from_code_words(correct_code_words, g, len_of_inf_word)
-    print('code_words:', code_words)
-    print('correct_code_words:', correct_code_words)
-    print('inf_words:', inf_words)
-    print('decode_inf_words:', decode_inf_words)
+    # print('code_words:', code_words)
+    # print('correct_code_words:', correct_code_words)
+    # print('inf_words:', inf_words)
+    # print('decode_inf_words:', decode_inf_words)
 
     decode_text = make_char_from_inf_word(decode_inf_words, need_len_to_make_char_from_inf_word)
-    print(text)
-    print(decode_text)
+    # print(text)
+    # print(decode_text)
 
-    print(decode_text == text)
+    # print(decode_text == text)
 
     return {
         'initial_text': text,
