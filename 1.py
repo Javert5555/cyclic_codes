@@ -1,4 +1,3 @@
-import numpy as np
 from copy import deepcopy
 from numpy.polynomial import Polynomial
 from random import randint
@@ -7,7 +6,6 @@ from math import ceil
 import tkinter as tk
 # from tkinter import ttk
 from tkinter import messagebox
-from tkinter import filedialog as fd
 import tkinter.scrolledtext as scrolledtext
 
 # получить последовательность из дважды вложенного массива
@@ -234,7 +232,6 @@ def get_solution(text, num_of_errors):
     n = get_n(g, len_of_inf_word)
     # print('n: ', n)
 
-    # text = 'й111111111йййййцукенгшщзхъ\фывапролджэячсмитьбю.qwertyuiop[]]]]]\asdfghjkl;zxcvbnm,./|'
 
     inf_words = get_inf_words(text, len_of_inf_word, need_len_to_make_char_from_inf_word)
     # print('inf_words: ', inf_words)
@@ -375,6 +372,14 @@ class Main(tk.Tk):
         self.initial_text = tk.Text(self.f_top, height=20, width=55)
         self.initial_text.pack(side='top')
         self.initial_text.pack(pady=(10, 0))
+
+        self.label_gen_pol = tk.Label(self.f_top, text='Порождающий полином: g(x)=1+x^4+x^6+x^7+x^8')
+        self.label_gen_pol.pack(side='top')
+        self.label_gen_pol.pack(pady=(10, 0))
+
+        self.params = tk.Label(self.f_top, text='Длина кодовых слов: 15. Длина информационных слов: 7.')
+        self.params.pack(side='top')
+        self.params.pack(pady=(10, 0))
 
         self.num_of_errors = tk.IntVar()
 
