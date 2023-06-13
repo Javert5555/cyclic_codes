@@ -77,8 +77,7 @@ def get_inf_words(text, len_of_inf_word, need_len_to_make_char_from_inf_word):
     count_of_inf_word_need_len = ceil(len(inf_words) // len_of_inf_word) + 1
     inf_words = make_vector_need_len(inf_words, len_of_inf_word * count_of_inf_word_need_len)
     inf_words_need_len = []
-    for j in range(count_of_inf_word_need_len):
-        inf_words_need_len.append(inf_words[j*len_of_inf_word:(j+1)*len_of_inf_word])
+    for j in range(count_of_inf_word_need_len): inf_words_need_len.append(inf_words[j*len_of_inf_word:(j+1)*len_of_inf_word])
     
     # print(len_of_inf_word * ceil(len(inf_words) // len_of_inf_word))
     # print(len(inf_words))
@@ -198,24 +197,26 @@ def get_inf_word_from_code_word(code_word, gen_polynom, len_of_inf_word):
 
 # получаем информационные слова из кодовых слов
 def get_inf_words_from_code_words(code_words, gen_polynom, len_of_inf_word):
-    decode_inf_words = []
+    decoded_inf_words = []
     for code_word in code_words:
-        decode_inf_words.append(get_inf_word_from_code_word(code_word, gen_polynom, len_of_inf_word))
-    return decode_inf_words
+        decoded_inf_words.append(get_inf_word_from_code_word(code_word, gen_polynom, len_of_inf_word))
+    return decoded_inf_words
 
 # получить букву из информационного слова
-def make_char_from_inf_word(inf_word):
-    return chr(int('0b' + ''.join([str(num) for num in reversed(deepcopy(inf_word))]), 2))
+# def make_char_from_inf_word(inf_word):
+#     return chr(int('0b' + ''.join([str(num) for num in reversed(deepcopy(inf_word))]), 2))
 
-def make_char_from_inf_word(inf_words, need_len_to_make_char_from_inf_word):
-    decode_text = ''
+# получить буквы из информационных слов
+def make_char_from_inf_words(inf_words, need_len_to_make_char_from_inf_word):
+    decoded_text = ''
     text = deepcopy(inf_words)
     for i in range(len(text)):
         text[i] = ''.join([str(char) for char in text[i]])
     text = ''.join(text)
     for j in range(len(text)//need_len_to_make_char_from_inf_word):
-        decode_text += chr(int('0b' + ''.join(reversed(list(text[j*need_len_to_make_char_from_inf_word:(j+1)*need_len_to_make_char_from_inf_word]))), 2))
-    return decode_text
+        # decoded_text += chr(int('0b' + ''.join(reversed(list(text[j*need_len_to_make_char_from_inf_word:(j+1)*need_len_to_make_char_from_inf_word]))), 2))
+        decoded_text += chr(int('0b' + ''.join(reversed(list(text[j*need_len_to_make_char_from_inf_word:(j+1)*need_len_to_make_char_from_inf_word]))), 2))
+    return decoded_text
 
 def get_solution(text, num_of_errors):
     # 1 + x + x^2 + x^5 + x^6 + x^9
@@ -254,23 +255,23 @@ def get_solution(text, num_of_errors):
 
     correct_code_words = correct_mistake_in_code_words(code_words_with_mistakes, g, n, t)
 
-    decode_inf_words = get_inf_words_from_code_words(correct_code_words, g, len_of_inf_word)
+    decoded_inf_words = get_inf_words_from_code_words(correct_code_words, g, len_of_inf_word)
     # print('code_words:', code_words)
     # print('correct_code_words:', correct_code_words)
     # print('inf_words:', inf_words)
-    # print('decode_inf_words:', decode_inf_words)
+    # print('decoded_inf_words:', decoded_inf_words)
 
-    decode_text = make_char_from_inf_word(decode_inf_words, need_len_to_make_char_from_inf_word)
+    decoded_text = make_char_from_inf_words(decoded_inf_words, need_len_to_make_char_from_inf_word)
     # print(text)
-    # print(decode_text)
+    # print(decoded_text)
 
-    # print(decode_text == text)
+    # print(decoded_text == text)
 
     return {
         'initial_text': text,
-        'decode_text': decode_text,
+        'decoded_text': decoded_text,
         'inf_words': create_sequence_from_double_nested_array(inf_words),
-        'decode_inf_words': create_sequence_from_double_nested_array(decode_inf_words),
+        'decoded_inf_words': create_sequence_from_double_nested_array(decoded_inf_words),
         'code_words': create_sequence_from_double_nested_array(code_words),
         'code_words_with_mistakes': create_sequence_from_double_nested_array(code_words_with_mistakes),
         'correct_code_words': create_sequence_from_double_nested_array(correct_code_words)
@@ -279,7 +280,7 @@ def get_solution(text, num_of_errors):
 class SecondWindow(tk.Toplevel):
     def __init__(self, master=None, result=None):
         super().__init__(master)
-        self.title("Second window")
+        self.title('Циклические коды, окно вывода данных')
         self.minsize(1320, 660)
 
         self.f_left = tk.Frame(self)
@@ -326,9 +327,9 @@ class SecondWindow(tk.Toplevel):
         self.label5.pack(side='top')
         self.label5.pack(pady=10)
 
-        self.text_decode_inf_words = scrolledtext.ScrolledText(self.f_right, wrap=tk.WORD, height=7)
-        self.text_decode_inf_words.pack(side='top')
-        self.text_decode_inf_words.insert(tk.END, result['decode_inf_words'])
+        self.text_decoded_inf_words = scrolledtext.ScrolledText(self.f_right, wrap=tk.WORD, height=7)
+        self.text_decoded_inf_words.pack(side='top')
+        self.text_decoded_inf_words.insert(tk.END, result['decoded_inf_words'])
         
         self.label6 = tk.Label(self.f_right, text=result['title6'])
         self.label6.pack(side='top')
@@ -342,18 +343,18 @@ class SecondWindow(tk.Toplevel):
         self.label7.pack(side='top')
         self.label7.pack(pady=10)
 
-        self.decode_text = scrolledtext.ScrolledText(self.f_right, wrap=tk.WORD, height=7)
-        self.decode_text.pack(side='top')
-        self.decode_text.insert(tk.END, result['decode_text'])
+        self.decoded_text = scrolledtext.ScrolledText(self.f_right, wrap=tk.WORD, height=7)
+        self.decoded_text.pack(side='top')
+        self.decoded_text.insert(tk.END, result['decoded_text'])
 
 
 
 class Main(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.geometry('600x500')
-        self.minsize(600, 500)
-        self.title('Циклические коды')
+        self.geometry('600x540')
+        self.minsize(600, 540)
+        self.title('Циклические коды, окно ввода данных')
 
         self.f_top = tk.Frame(self)
         self.f_top.pack()
@@ -369,7 +370,11 @@ class Main(tk.Tk):
         self.label_initial_text.pack(side='top')
         self.label_initial_text.pack(pady=(10, 0))
 
-        self.initial_text = tk.Text(self.f_top, height=20, width=55)
+        # self.initial_text = tk.Text(self.f_top, height=20, width=55)
+        # self.initial_text.pack(side='top')
+        # self.initial_text.pack(pady=(10, 0))
+
+        self.initial_text = scrolledtext.ScrolledText(self.f_top, wrap=tk.WORD, height=20, width=55)
         self.initial_text.pack(side='top')
         self.initial_text.pack(pady=(10, 0))
 
@@ -377,9 +382,13 @@ class Main(tk.Tk):
         self.label_gen_pol.pack(side='top')
         self.label_gen_pol.pack(pady=(10, 0))
 
-        self.params = tk.Label(self.f_top, text='Длина кодовых слов: 15. Длина информационных слов: 7.')
-        self.params.pack(side='top')
-        self.params.pack(pady=(10, 0))
+        self.len_params = tk.Label(self.f_top, text='Длина кодовых слов: 15. Длина информационных слов: 7.')
+        self.len_params.pack(side='top')
+        self.len_params.pack(pady=(10, 0))
+
+        self.num_fixed_error = tk.Label(self.f_top, text='Количество гарантированно исправляемых ошибок: 2')
+        self.num_fixed_error.pack(side='top')
+        self.num_fixed_error.pack(pady=(10, 0))
 
         self.num_of_errors = tk.IntVar()
 
@@ -406,8 +415,8 @@ class Main(tk.Tk):
     
     def get_all_inputs_and_get_solution(self):
         try:
-            self.initial_text_var = self.initial_text.get("1.0","end").strip()
-            if (self.initial_text_var == ''):
+            self.initial_text_var = self.initial_text.get("1.0","end")
+            if (self.initial_text_var.strip() == ''):
                 messagebox.showwarning(title="Предупреждение", message="Введите текст, который надо закодировать")
                 return
         except:
@@ -428,73 +437,12 @@ class Main(tk.Tk):
             'title4': 'Последовательность информационных слов:',
             'inf_words': self.result['inf_words'],
             'title5': 'Последовательность информационных слов после декодирования:',
-            'decode_inf_words': self.result['decode_inf_words'],
+            'decoded_inf_words': self.result['decoded_inf_words'],
             'title6': 'Начальный текст:',
             'initial_text': self.result['initial_text'],
             'title7': 'Текст после кодирования/декодирования:',
-            'decode_text': self.result['decode_text'],
+            'decoded_text': self.result['decoded_text'],
         })
-        # self.open_window({
-        #     'input_title': 'Последовательность информационных слов до декодирования:',
-        #     'input_text': self.result['inf_words'],
-        #     'output_title': 'Последовательность информационных слов после декодирования:',
-        #     'output_text': self.result['code_words_with_mistakes']
-        # })
-
-    # def get_all_inputs_and_get_solution(self):
-    #     try:
-    #         self.count_of_adders_var = int(self.count_of_adders.get("1.0","end").strip())
-    #         if (self.count_of_adders_var < 2 or self.count_of_adders_var > 5):
-    #             messagebox.showwarning(title="Предупреждение", message="Количество сумматоров должно быть больше 1 и меньше 5")
-    #             return
-    #     except:
-    #         messagebox.showwarning(title="Предупреждение", message="Введите корректные значения количества сумматоров")
-    #         return
-        
-    #     try:
-    #         self.adders_var = [row.split(',') for row in self.adders.get("1.0","end").strip().split('\n')]
-    #         if (self.count_of_adders_var != len(self.adders_var)):
-    #             messagebox.showwarning(title="Предупреждение", message="Неверно указано количество сумматоров")
-    #             return
-    #         for i in range(len(self.adders_var)):
-    #             if (len(self.adders_var[i]) < 2 or len(self.adders_var[i]) > 3):
-    #                 messagebox.showwarning(title="Предупреждение", message="Количество регистров сумматора должно быть равно 2 или 3")
-    #                 return
-    #             for j in range(len(self.adders_var[i])):
-    #                 self.adders_var[i][j] = int(self.adders_var[i][j])
-    #                 if (self.adders_var[i][j] < 1 or self.adders_var[i][j] > 3):
-    #                     messagebox.showwarning(title="Предупреждение", message="Номер регистра не может быть больше 3 или меньше 1")
-    #                     return
-    #     except:
-    #         messagebox.showwarning(title="Предупреждение", message="Введите корректные значения номеров регистров сумматоров")
-    #         return
-        
-    #     try:
-    #         self.num_of_errors_var = int(self.num_of_errors.get("1.0","end").strip())
-    #         if (self.num_of_errors_var < 0 or self.count_of_adders_var > 8):
-    #             messagebox.showwarning(title="Предупреждение", message="Количество ошибок должно быть больше 0 и меньше 9")
-    #             return
-    #     except:
-    #         messagebox.showwarning(title="Предупреждение", message="Указано некорректное число ошибок")
-    #         return
-
-    #     try:
-    #         self.initial_text_var = self.initial_text.get("1.0","end").strip()
-    #         if (self.initial_text_var == ''):
-    #             messagebox.showwarning(title="Предупреждение", message="Введите текст, который надо закодировать")
-    #             return
-    #     except:
-    #         messagebox.showwarning(title="Предупреждение", message="Что-то пошло не так")
-    #         return
-        
-    #     result = get_solution({
-    #         'count_of_adders': self.count_of_adders_var,
-    #         'adders': self.adders_var,
-    #         'num_of_errors': self.num_of_errors_var,
-    #         'initial_text': self.initial_text_var
-    #     })
-    #     messagebox.showwarning(title="Закодированная последовательность", message=result['code_words'])
-    #     messagebox.showwarning(title="Исходная последовательность", message=result['initial_text'])
 
 if __name__ == "__main__":
     main = Main()
